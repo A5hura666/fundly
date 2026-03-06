@@ -18,7 +18,7 @@ export class Investment {
   @JoinColumn({ name: 'investorId' })
   investor: User;
 
-  @Column('uuid')
+  @Column()
   investorId: number;
 
   @ManyToOne(() => Project, (project) => project.investments)

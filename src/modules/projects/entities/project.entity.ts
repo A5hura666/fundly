@@ -33,7 +33,7 @@ export class Project {
   @JoinColumn({ name: 'ownerId' })
   owner: User;
 
-  @Column('uuid')
+  @Column()
   ownerId: number;
 
   @OneToMany(() => Investment, (investment) => investment.project)

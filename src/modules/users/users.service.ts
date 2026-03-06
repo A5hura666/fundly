@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { Interest } from '../interests/entities/interest.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -47,14 +52,29 @@ export class UsersService {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
-    if (updateUserDto.email !== undefined) user.email = updateUserDto.email;
-    if (updateUserDto.password !== undefined)
-      user.password = updateUserDto.password;
-    if (updateUserDto.firstname !== undefined)
+    if (
+      updateUserDto.email !== undefined &&
+      updateUserDto.email !== user.email
+    ) {
+      const existing = await this.userRepository.findOneBy({
+        email: updateUserDto.email,
+      });
+      if (existing) {
+        throw new ConflictException('Cet email est déjà utilisé');
+      }
+      user.email = updateUserDto.email;
+    }
+
+    if (updateUserDto.password !== undefined) {
+      user.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    if (updateUserDto.firstname !== undefined) {
       user.firstname = updateUserDto.firstname;
-    if (updateUserDto.lastname !== undefined)
+    }
+    if (updateUserDto.lastname !== undefined) {
       user.lastname = updateUserDto.lastname;
-    if (updateUserDto.role !== undefined) user.role = updateUserDto.role;
+    }
 
     if (updateUserDto.interests) {
       user.interests = updateUserDto.interests.map((id) => {

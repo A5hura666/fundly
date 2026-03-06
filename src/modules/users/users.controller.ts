@@ -1,34 +1,69 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../auth/roles.decorator';
+import { FastifyRequest } from 'fastify';
 
+@ApiTags('Utilisateurs')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Voir son profil' })
+  @ApiResponse({ status: 200, description: 'Profil récupéré avec succès' })
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Req() req: FastifyRequest & { user: { sub: number } }) {
+    return this.usersService.findOne(req.user.sub);
   }
 
+  @ApiOperation({ summary: 'Mettre à jour son profil' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Profil mis à jour avec succès' })
+  @UseGuards(JwtAuthGuard)
+  @Put('profile')
+  updateProfile(
+    @Req() req: FastifyRequest & { user: { sub: number } },
+    @Body() data: UpdateUserDto,
+  ) {
+    return this.usersService.update(req.user.sub, data);
+  }
+
+  @ApiOperation({ summary: 'Lister tous les utilisateurs (admin)' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Liste des utilisateurs récupérée' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Get()
-  findAll() {
+  getAllUsers() {
     return this.usersService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
+  @ApiOperation({ summary: 'Supprimer un utilisateur (admin)' })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Utilisateur supprimé' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  deleteUser(@Param('id') id: number) {
+    return this.usersService.remove(id);
   }
 }

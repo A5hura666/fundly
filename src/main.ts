@@ -24,8 +24,8 @@ async function starter() {
   app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
-    .setTitle('Tour de France API')
-    .setDescription('API Test pour le projet Tour de France')
+    .setTitle('Qui veut-être mon associé API')
+    .setDescription('API Test pour le projet Fundly')
     .setVersion('1.0')
     .addBearerAuth()
     .addServer('http://localhost:3000', 'Local server')

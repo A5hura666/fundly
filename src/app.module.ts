@@ -4,6 +4,10 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { buildTypeOrmConfig } from './config/typeorm.config';
+import { UsersModule } from './modules/users/users.module';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { InvestmentsModule } from './modules/investments/investments.module';
+import { InterestsModule } from './modules/interests/interests.module';
 
 @Module({
   imports: [
@@ -14,6 +18,10 @@ import { buildTypeOrmConfig } from './config/typeorm.config';
       useFactory: (configService: ConfigService) =>
         buildTypeOrmConfig(configService),
     }),
+    UsersModule,
+    ProjectsModule,
+    InvestmentsModule,
+    InterestsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

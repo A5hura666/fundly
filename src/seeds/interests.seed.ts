@@ -20,10 +20,15 @@ export async function seedInterests(app: INestApplicationContext) {
   const interests: Interest[] = [];
 
   for (const name of names) {
-    const interest = repo.create({ name });
+    let interest = await repo.findOne({ where: { name } });
+
+    if (!interest) {
+      interest = repo.create({ name });
+      await repo.save(interest);
+    }
+
     interests.push(interest);
   }
 
-  await repo.save(interests);
   return interests;
 }

@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Project } from './entities/project.entity';
 import { Interest } from '../interests/entities/interest.entity';
+import { UserRole } from '../users/entities/user.entity';
 
 @Injectable()
 export class ProjectsService {
@@ -13,10 +18,13 @@ export class ProjectsService {
     private projectRepository: Repository<Project>,
   ) {}
 
-  async create(createProjectDto: CreateProjectDto) {
+  async create(userId: number, createProjectDto: CreateProjectDto) {
     const { interests: interestIds, ...projectData } = createProjectDto;
 
-    const project = this.projectRepository.create(projectData);
+    const project = this.projectRepository.create({
+      ...projectData,
+      ownerId: userId,
+    });
 
     if (interestIds && interestIds.length > 0) {
       project.interests = interestIds.map((id) => {
@@ -33,11 +41,17 @@ export class ProjectsService {
     return this.projectRepository.find();
   }
 
-  findOne(id: number) {
-    return this.projectRepository.findOneBy({ id });
+  async findOne(id: number) {
+    const project = await this.projectRepository.findOneBy({ id });
+
+    if (!project) {
+      throw new NotFoundException('Projet non trouvé');
+    }
+
+    return project;
   }
 
-  async update(id: number, updateProjectDto: UpdateProjectDto) {
+  async update(userId: number, id: number, updateProjectDto: UpdateProjectDto) {
     const project = await this.projectRepository.findOne({
       where: { id },
       relations: ['interests'],
@@ -45,6 +59,12 @@ export class ProjectsService {
 
     if (!project) {
       throw new NotFoundException('Projet non trouvé');
+    }
+
+    if (project.ownerId !== userId) {
+      throw new ForbiddenException(
+        "Vous n'êtes pas le propriétaire de ce projet",
+      );
     }
 
     if (updateProjectDto.title !== undefined)
@@ -67,7 +87,21 @@ export class ProjectsService {
     return this.projectRepository.save(project);
   }
 
-  remove(id: number) {
-    return this.projectRepository.delete(id);
+  async remove(userId: number, userRole: UserRole, id: number) {
+    const project = await this.projectRepository.findOneBy({ id });
+
+    if (!project) {
+      throw new NotFoundException('Projet non trouvé');
+    }
+
+    if (userRole !== UserRole.ADMIN && project.ownerId !== userId) {
+      throw new ForbiddenException(
+        "Vous n'êtes pas le propriétaire de ce projet",
+      );
+    }
+
+    await this.projectRepository.delete(id);
+
+    return { message: 'Projet supprimé avec succès' };
   }
 }

@@ -96,4 +96,39 @@ export class UsersService {
 
     return { message: 'Utilisateur supprimé avec succès' };
   }
+
+  // Méthodes pour gérer les intérêts
+  async setInterests(userId: number, interestIds: number[]) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['interests'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    user.interests = interestIds.map((id) => {
+      const interest = new Interest();
+      interest.id = id;
+      return interest;
+    });
+
+    await this.userRepository.save(user);
+
+    return { message: "Centres d'intérêt mis à jour avec succès" };
+  }
+
+  async getInterests(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['interests'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    return user.interests;
+  }
 }

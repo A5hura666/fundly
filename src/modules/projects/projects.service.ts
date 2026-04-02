@@ -6,16 +6,18 @@ import {
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Project } from './entities/project.entity';
 import { Interest } from '../interests/entities/interest.entity';
-import { UserRole } from '../users/entities/user.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectRepository(Project)
     private projectRepository: Repository<Project>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async create(userId: number, createProjectDto: CreateProjectDto) {
@@ -103,5 +105,28 @@ export class ProjectsService {
     await this.projectRepository.delete(id);
 
     return { message: 'Projet supprimé avec succès' };
+  }
+
+  // Méthodes pour gérer les intérêts
+  async findRecommended(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['interests'],
+    });
+
+    if (!user || user.interests.length === 0) {
+      return [];
+    }
+
+    const interestIds = user.interests.map((i) => i.id);
+
+    return this.projectRepository.find({
+      where: {
+        interests: {
+          id: In(interestIds),
+        },
+      },
+      relations: ['interests'],
+    });
   }
 }

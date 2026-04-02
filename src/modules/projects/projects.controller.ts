@@ -3,21 +3,17 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
   Req,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
@@ -63,7 +59,7 @@ export class ProjectsController {
   @ApiResponse({ status: 200, description: 'Projet mis à jour avec succès' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('entrepreneur')
-  @Patch(':id')
+  @Put(':id')
   update(
     @Req() req: FastifyRequest & { user: { sub: number } },
     @Param('id', ParseIntPipe) id: number,
@@ -84,5 +80,13 @@ export class ProjectsController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.projectsService.remove(req.user.sub, req.user.role, id);
+  }
+
+  @ApiOperation({ summary: "Projets recommandés selon ses centres d'intérêt" })
+  @ApiResponse({ status: 200, description: 'Projets recommandés récupérés' })
+  @UseGuards(JwtAuthGuard)
+  @Get('recommended')
+  getRecommended(@Req() req: FastifyRequest & { user: { sub: number } }) {
+    return this.projectsService.findRecommended(req.user.sub);
   }
 }

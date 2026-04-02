@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   ParseIntPipe,
+  Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -21,6 +22,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
 import { FastifyRequest } from 'fastify';
+import { SetInterestsDto } from '../interests/dto/set-interests.dto';
 
 @ApiTags('Utilisateurs')
 @Controller('users')
@@ -66,5 +68,24 @@ export class UsersController {
   @Delete(':id')
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
+  }
+
+  @ApiOperation({ summary: 'Associer des intérêts à son profil' })
+  @ApiResponse({ status: 200, description: 'Intérêts mis à jour avec succès' })
+  @UseGuards(JwtAuthGuard)
+  @Post('interests')
+  setInterests(
+    @Req() req: FastifyRequest & { user: { sub: number } },
+    @Body() body: SetInterestsDto,
+  ) {
+    return this.usersService.setInterests(req.user.sub, body.interests);
+  }
+
+  @ApiOperation({ summary: "Voir ses centres d'intérêt" })
+  @ApiResponse({ status: 200, description: 'Intérêts récupérés avec succès' })
+  @UseGuards(JwtAuthGuard)
+  @Get('interests')
+  getInterests(@Req() req: FastifyRequest & { user: { sub: number } }) {
+    return this.usersService.getInterests(req.user.sub);
   }
 }

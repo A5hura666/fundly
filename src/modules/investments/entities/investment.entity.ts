@@ -14,14 +14,16 @@ export class Investment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.investments)
+  @ManyToOne(() => User, (user) => user.investments, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'investorId' })
   investor: User;
 
   @Column()
   investorId: number;
 
-  @ManyToOne(() => Project, (project) => project.investments)
+  @ManyToOne(() => Project, (project) => project.investments, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'projectId' })
   project: Project;
 

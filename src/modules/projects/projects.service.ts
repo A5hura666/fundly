@@ -53,7 +53,12 @@ export class ProjectsService {
     return project;
   }
 
-  async update(userId: number, id: number, updateProjectDto: UpdateProjectDto) {
+  async update(
+    userId: number,
+    userRole: UserRole,
+    id: number,
+    updateProjectDto: UpdateProjectDto,
+  ) {
     const project = await this.projectRepository.findOne({
       where: { id },
       relations: ['interests'],
@@ -63,7 +68,7 @@ export class ProjectsService {
       throw new NotFoundException('Projet non trouvé');
     }
 
-    if (project.ownerId !== userId) {
+    if (userRole !== UserRole.ADMIN && project.ownerId !== userId) {
       throw new ForbiddenException(
         "Vous n'êtes pas le propriétaire de ce projet",
       );

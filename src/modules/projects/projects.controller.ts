@@ -28,7 +28,7 @@ export class ProjectsController {
   @ApiOperation({ summary: 'Créer un projet (entrepreneur)' })
   @ApiResponse({ status: 201, description: 'Projet créé avec succès' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('entrepreneur')
+  @Roles(UserRole.ENTREPRENEUR, UserRole.ADMIN)
   @Post()
   create(
     @Req() req: FastifyRequest & { user: { sub: number } },
@@ -58,14 +58,19 @@ export class ProjectsController {
   })
   @ApiResponse({ status: 200, description: 'Projet mis à jour avec succès' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('entrepreneur')
+  @Roles(UserRole.ENTREPRENEUR, UserRole.ADMIN)
   @Put(':id')
   update(
-    @Req() req: FastifyRequest & { user: { sub: number } },
+    @Req() req: FastifyRequest & { user: { sub: number; role: UserRole } },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProjectDto: UpdateProjectDto,
   ) {
-    return this.projectsService.update(req.user.sub, id, updateProjectDto);
+    return this.projectsService.update(
+      req.user.sub,
+      req.user.role,
+      id,
+      updateProjectDto,
+    );
   }
 
   @ApiOperation({
@@ -73,7 +78,7 @@ export class ProjectsController {
   })
   @ApiResponse({ status: 200, description: 'Projet supprimé avec succès' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('entrepreneur', 'admin')
+  @Roles(UserRole.ENTREPRENEUR, UserRole.ADMIN)
   @Delete(':id')
   remove(
     @Req() req: FastifyRequest & { user: { sub: number; role: UserRole } },

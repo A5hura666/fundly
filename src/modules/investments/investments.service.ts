@@ -8,7 +8,7 @@ import { UpdateInvestmentDto } from './dto/update-investment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Investment } from './entities/investment.entity';
-import { User } from '../users/entities/user.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 import { Project } from '../projects/entities/project.entity';
 
 @Injectable()
@@ -77,13 +77,13 @@ export class InvestmentsService {
     return this.investmentRepository.update(id, updateInvestmentDto);
   }
 
-  async remove(userId: number, id: number) {
+  async remove(userId: number, userRole: UserRole, id: number) {
     const investment = await this.investmentRepository.findOneBy({ id });
     if (!investment) {
       throw new NotFoundException('Investissement non trouvé');
     }
 
-    if (investment.investorId !== userId) {
+    if (userRole !== UserRole.ADMIN && investment.investorId !== userId) {
       throw new ForbiddenException(
         "Vous n'êtes pas le propriétaire de cet investissement",
       );

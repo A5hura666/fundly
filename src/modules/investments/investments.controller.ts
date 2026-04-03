@@ -26,7 +26,7 @@ export class InvestmentsController {
   @ApiOperation({ summary: 'Investir dans un projet (investisseur)' })
   @ApiResponse({ status: 201, description: 'Investissement créé avec succès' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INVESTOR)
+  @Roles(UserRole.INVESTOR, UserRole.ADMIN)
   @Post()
   create(
     @Req() req: FastifyRequest & { user: { sub: number } },
@@ -41,7 +41,7 @@ export class InvestmentsController {
     description: 'Liste des investissements récupérée',
   })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INVESTOR)
+  @Roles(UserRole.INVESTOR, UserRole.ADMIN)
   @Get()
   findMyInvestments(@Req() req: FastifyRequest & { user: { sub: number } }) {
     return this.investmentsService.findByInvestor(req.user.sub);
@@ -66,12 +66,12 @@ export class InvestmentsController {
   @ApiResponse({ status: 403, description: 'Non autorisé' })
   @ApiResponse({ status: 404, description: 'Investissement non trouvé' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INVESTOR)
+  @Roles(UserRole.INVESTOR, UserRole.ADMIN)
   @Delete(':id')
   remove(
-    @Req() req: FastifyRequest & { user: { sub: number } },
+    @Req() req: FastifyRequest & { user: { sub: number; role: UserRole } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.investmentsService.remove(req.user.sub, id);
+    return this.investmentsService.remove(req.user.sub, req.user.role, id);
   }
 }

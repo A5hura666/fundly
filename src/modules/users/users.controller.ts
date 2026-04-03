@@ -23,6 +23,7 @@ import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
 import { FastifyRequest } from 'fastify';
 import { SetInterestsDto } from '../interests/dto/set-interests.dto';
+import { UserRole } from './entities/user.entity';
 
 @ApiTags('Utilisateurs')
 @Controller('users')
@@ -54,7 +55,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Liste des utilisateurs récupérée' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   @Get()
   getAllUsers() {
     return this.usersService.findAll();
@@ -64,7 +65,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Utilisateur supprimé' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   @Delete(':id')
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);

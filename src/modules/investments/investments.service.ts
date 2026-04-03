@@ -50,6 +50,18 @@ export class InvestmentsService {
     return this.investmentRepository.find({
       where: { investorId: userId },
       relations: ['project'],
+      select: {
+        id: true,
+        amount: true,
+        date: true,
+        project: {
+          id: true,
+          title: true,
+          description: true,
+          budget: true,
+          category: true,
+        },
+      },
     });
   }
 
@@ -62,6 +74,17 @@ export class InvestmentsService {
     return this.investmentRepository.find({
       where: { projectId },
       relations: ['investor'],
+      select: {
+        id: true,
+        amount: true,
+        date: true,
+        investor: {
+          id: true,
+          firstname: true,
+          lastname: true,
+          email: true,
+        },
+      },
     });
   }
 

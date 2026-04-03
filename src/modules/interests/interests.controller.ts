@@ -12,7 +12,12 @@ import {
 import { InterestsService } from './interests.service';
 import { CreateInterestDto } from './dto/create-interest.dto';
 import { UpdateInterestDto } from './dto/update-interest.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
@@ -24,6 +29,7 @@ export class InterestsController {
   constructor(private readonly interestsService: InterestsService) {}
 
   @ApiOperation({ summary: "Créer un centre d'intérêt" })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 201,
     description: "Centre d'intérêt créé avec succès",
@@ -54,6 +60,7 @@ export class InterestsController {
   }
 
   @ApiOperation({ summary: "Mettre à jour un centre d'intérêt" })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: "Centre d'intérêt mis à jour avec succès",
@@ -70,6 +77,7 @@ export class InterestsController {
   }
 
   @ApiOperation({ summary: "Supprimer un centre d'intérêt" })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: "Centre d'intérêt supprimé avec succès",

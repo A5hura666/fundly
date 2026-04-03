@@ -72,6 +72,7 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Associer des intérêts à son profil' })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Intérêts mis à jour avec succès' })
   @UseGuards(JwtAuthGuard)
   @Post('interests')
@@ -83,6 +84,7 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: "Voir ses centres d'intérêt" })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Intérêts récupérés avec succès' })
   @UseGuards(JwtAuthGuard)
   @Get('interests')

@@ -13,7 +13,12 @@ import {
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
@@ -26,6 +31,7 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @ApiOperation({ summary: 'Créer un projet (entrepreneur)' })
+  @ApiBearerAuth()
   @ApiResponse({ status: 201, description: 'Projet créé avec succès' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ENTREPRENEUR, UserRole.ADMIN)
@@ -38,6 +44,7 @@ export class ProjectsController {
   }
 
   @ApiOperation({ summary: 'Lister tous les projets' })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Liste des projets récupérée' })
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -46,6 +53,7 @@ export class ProjectsController {
   }
 
   @ApiOperation({ summary: 'Consulter un projet par ID' })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Projet récupéré avec succès' })
   @UseGuards(JwtAuthGuard)
   @Get(':id')
@@ -56,6 +64,7 @@ export class ProjectsController {
   @ApiOperation({
     summary: 'Mettre à jour un projet (entrepreneur propriétaire)',
   })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Projet mis à jour avec succès' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ENTREPRENEUR, UserRole.ADMIN)
@@ -76,6 +85,7 @@ export class ProjectsController {
   @ApiOperation({
     summary: 'Supprimer un projet (entrepreneur propriétaire ou admin)',
   })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Projet supprimé avec succès' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ENTREPRENEUR, UserRole.ADMIN)
@@ -88,6 +98,7 @@ export class ProjectsController {
   }
 
   @ApiOperation({ summary: "Projets recommandés selon ses centres d'intérêt" })
+  @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Projets recommandés récupérés' })
   @UseGuards(JwtAuthGuard)
   @Get('recommended')

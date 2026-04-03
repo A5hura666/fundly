@@ -11,7 +11,12 @@ import {
 } from '@nestjs/common';
 import { InvestmentsService } from './investments.service';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
@@ -24,6 +29,7 @@ export class InvestmentsController {
   constructor(private readonly investmentsService: InvestmentsService) {}
 
   @ApiOperation({ summary: 'Investir dans un projet (investisseur)' })
+  @ApiBearerAuth()
   @ApiResponse({ status: 201, description: 'Investissement créé avec succès' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.INVESTOR, UserRole.ADMIN)
@@ -36,6 +42,7 @@ export class InvestmentsController {
   }
 
   @ApiOperation({ summary: 'Voir ses investissements (investisseur)' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: 'Liste des investissements récupérée',
@@ -48,6 +55,7 @@ export class InvestmentsController {
   }
 
   @ApiOperation({ summary: "Voir les investissements d'un projet" })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: 'Investissements du projet récupérés',
@@ -59,6 +67,7 @@ export class InvestmentsController {
   }
 
   @ApiOperation({ summary: 'Annuler un investissement (investisseur)' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: 'Investissement annulé avec succès',
